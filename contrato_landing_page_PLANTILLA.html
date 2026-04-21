@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contrato Landing Page · dr.saia</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+  :root {
+    --cream: #F7F5F2; --dark: #1C2B2B; --green: #3D6B5F;
+    --green-light: #5B8A7A; --green-pale: #EAF2EF;
+    --muted: #8A9E9A; --border: #E2DED8; --white: #ffffff; --accent: #BA7517;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #ECEAE6; font-family: 'Poppins', sans-serif; color: var(--dark); min-height: 100vh; }
+
+  /* BANNER */
+  .signing-banner {
+    background: var(--dark); color: var(--white);
+    padding: 14px 40px; display: flex; align-items: center;
+    justify-content: space-between; position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 2px 20px rgba(0,0,0,0.3);
+  }
+  .banner-left { display: flex; align-items: center; gap: 12px; }
+  .banner-logo { font-size: 18px; font-weight: 600; letter-spacing: -0.5px; }
+  .banner-logo em { font-style: italic; font-weight: 300; }
+  .banner-title { font-size: 11px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; }
+  .banner-status { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--green-light); letter-spacing: 1px; }
+  .status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green-light); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  /* DOCUMENTO */
+  .doc-wrapper {
+    max-width: 860px; margin: 32px auto; background: var(--cream);
+    box-shadow: 0 8px 40px rgba(0,0,0,0.15); padding: 56px 72px;
+  }
+  .doc-header { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 24px; border-bottom: 1.5px solid var(--dark); margin-bottom: 48px; }
+  .logo-wordmark { font-size: 32px; font-weight: 600; letter-spacing: -1px; line-height: 1; }
+  .logo-wordmark em { font-style: italic; font-weight: 300; }
+  .logo-sub { font-size: 9px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); margin-top: 5px; font-weight: 400; }
+  .doc-meta-right { text-align: right; }
+  .doc-type { font-size: 11px; font-style: italic; color: var(--muted); letter-spacing: 1px; font-weight: 300; }
+  .doc-date { font-size: 11px; color: var(--muted); margin-top: 3px; font-weight: 300; }
+  .partes-grid { display: grid; grid-template-columns: 1fr 1fr; border: 1.5px solid var(--dark); margin-bottom: 44px; }
+  .parte-block { padding: 20px 24px; }
+  .parte-block:first-child { border-right: 1.5px solid var(--dark); }
+  .parte-label { font-size: 9px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; font-weight: 500; }
+  .parte-name { font-size: 15px; font-weight: 500; margin-bottom: 4px; }
+  .parte-detail { font-size: 11px; color: var(--muted); line-height: 1.7; font-weight: 300; }
+  .servicio-hero { background: var(--dark); color: var(--white); padding: 28px 32px; margin-bottom: 40px; display: flex; justify-content: space-between; align-items: flex-end; }
+  .servicio-tipo { font-size: 9px; letter-spacing: 3px; text-transform: uppercase; color: var(--green-light); margin-bottom: 10px; font-weight: 400; }
+  .servicio-nombre { font-size: 28px; font-weight: 600; line-height: 1.15; }
+  .servicio-hero-right { text-align: right; }
+  .servicio-precio-label { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; font-weight: 400; }
+  .servicio-precio { font-size: 34px; font-weight: 600; color: var(--white); line-height: 1; }
+  .servicio-precio-iva { font-size: 10px; color: var(--muted); margin-top: 3px; font-weight: 300; }
+  .seccion { margin-bottom: 32px; }
+  .seccion-num-titulo { display: flex; align-items: baseline; gap: 12px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+  .sec-num { font-size: 9px; letter-spacing: 3px; text-transform: uppercase; color: var(--green-light); font-weight: 500; flex-shrink: 0; }
+  .sec-titulo { font-size: 14px; font-weight: 600; }
+  .body { font-size: 12px; color: #3A4E4A; line-height: 1.9; font-weight: 300; margin-bottom: 10px; }
+  .body strong { color: var(--dark); font-weight: 500; }
+  .sub-titulo { font-size: 10px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--dark); margin: 16px 0 8px; }
+  .entregables-grid { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--border); margin-bottom: 14px; }
+  .entregable-item { padding: 11px 16px; font-size: 12px; color: #3A4E4A; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; gap: 8px; font-weight: 300; }
+  .entregable-item:nth-child(odd) { border-right: 1px solid var(--border); }
+  .entregable-item:last-child { border-bottom: none; }
+  .entregable-item:nth-last-child(2):nth-child(odd) { border-bottom: none; }
+  .entregable-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--green-light); flex-shrink: 0; margin-top: 6px; }
+  .etapa-grid { display: grid; grid-template-columns: repeat(3,1fr); border: 1px solid var(--border); margin-bottom: 12px; }
+  .etapa-item { padding: 14px 16px; border-right: 1px solid var(--border); }
+  .etapa-item:last-child { border-right: none; }
+  .etapa-num { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--green-light); margin-bottom: 5px; font-weight: 500; }
+  .etapa-titulo { font-size: 12px; font-weight: 600; color: var(--dark); margin-bottom: 4px; }
+  .etapa-desc { font-size: 11px; color: var(--muted); line-height: 1.5; font-weight: 300; }
+  .pago-table { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
+  .pago-table thead tr { background: var(--dark); }
+  .pago-table th { padding: 10px 16px; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--green-light); font-weight: 500; text-align: left; }
+  .pago-table td { padding: 12px 16px; font-size: 12px; color: #3A4E4A; border-bottom: 1px solid var(--border); font-weight: 300; }
+  .pago-table td:first-child { font-weight: 500; color: var(--dark); }
+  .pago-table tr:last-child td { border-bottom: none; background: var(--green-pale); font-weight: 600; color: var(--dark); }
+  .nota-box { border-left: 3px solid var(--accent); background: #FFFBF4; padding: 12px 16px; margin: 12px 0; }
+  .nota-box p { font-size: 11.5px; color: #5C3C0A; line-height: 1.7; font-weight: 300; }
+  .nota-box strong { font-weight: 600; color: #3A2306; }
+  .alerta-box { background: #FFF5F5; border: 1px solid #E8C4C4; border-left: 3px solid #C0392B; padding: 14px 18px; margin: 14px 0; }
+  .alerta-box p { font-size: 11.5px; color: #6B1A1A; line-height: 1.7; font-weight: 300; }
+  .alerta-box strong { font-weight: 600; color: #4A0E0E; }
+  .clausula-item { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 12px; color: #3A4E4A; line-height: 1.75; font-weight: 300; }
+  .clausula-item:last-child { border-bottom: none; }
+  .clausula-num { font-size: 9px; color: var(--green-light); font-weight: 500; letter-spacing: 1px; flex-shrink: 0; padding-top: 3px; min-width: 28px; }
+  .footer { margin-top: 44px; padding-top: 18px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; font-size: 9px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; font-weight: 400; }
+
+  /* FIRMAS */
+  .firmas-section { margin-top: 48px; }
+  .firmas-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; }
+  .firma-rol { font-size: 9px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; padding-bottom: 8px; border-bottom: 1.5px solid var(--dark); font-weight: 400; }
+  .firma-campo { margin-bottom: 18px; }
+  .firma-campo label { font-size: 9px; color: var(--muted); display: block; margin-bottom: 4px; letter-spacing: 1.5px; text-transform: uppercase; font-weight: 400; }
+  .firma-linea { border-bottom: 1px solid var(--border); height: 28px; font-size: 12px; color: var(--dark); font-weight: 400; display: flex; align-items: flex-end; padding-bottom: 3px; }
+  .fecha-final { margin-top: 32px; text-align: center; padding: 14px; border: 1px solid var(--border); font-size: 11px; color: var(--muted); font-weight: 300; }
+  .fecha-final strong { color: var(--dark); font-weight: 500; }
+  .firma-canvas-wrap { position: relative; border: 1.5px solid var(--border); background: var(--white); border-radius: 4px; overflow: hidden; transition: border-color 0.2s; }
+  .firma-canvas-wrap:hover { border-color: var(--green-light); }
+  .firma-canvas-wrap.has-firma { border-color: var(--green); }
+  canvas.firma-pad { display: block; width: 100%; height: 100px; cursor: crosshair; touch-action: none; }
+  .firma-hint { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 10px; color: var(--muted); letter-spacing: 1px; pointer-events: none; transition: opacity 0.2s; text-align: center; }
+  .firma-hint span { display: block; font-size: 20px; margin-bottom: 4px; }
+  .btn-limpiar { position: absolute; top: 6px; right: 6px; background: none; border: 1px solid var(--border); color: var(--muted); font-size: 9px; letter-spacing: 1px; padding: 3px 7px; cursor: pointer; font-family: 'Poppins', sans-serif; text-transform: uppercase; transition: all 0.15s; border-radius: 2px; }
+  .btn-limpiar:hover { border-color: var(--dark); color: var(--dark); }
+  .rfc-input { width: 100%; border: none; border-bottom: 1px solid var(--border); background: transparent; font-family: 'Poppins', sans-serif; font-size: 12px; font-weight: 400; color: var(--dark); padding: 4px 0; outline: none; transition: border-color 0.2s; }
+  .rfc-input:focus { border-bottom-color: var(--green); }
+  .rfc-input::placeholder { color: var(--muted); font-weight: 300; }
+  .terminos-wrap { margin-top: 32px; background: var(--green-pale); border: 1px solid #C4DDD7; padding: 18px 20px; display: flex; align-items: flex-start; gap: 14px; }
+  .terminos-check { width: 18px; height: 18px; min-width: 18px; border: 1.5px solid var(--green); border-radius: 3px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.15s; margin-top: 1px; }
+  .terminos-check.checked { background: var(--green); }
+  .terminos-check svg { display: none; }
+  .terminos-check.checked svg { display: block; }
+  .terminos-texto { font-size: 11px; color: #1C3C34; line-height: 1.7; font-weight: 300; }
+  .terminos-texto strong { font-weight: 500; }
+  .enviar-wrap { margin-top: 24px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  .btn-enviar { background: var(--dark); color: var(--white); border: none; padding: 16px 48px; font-family: 'Poppins', sans-serif; font-size: 12px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; transition: all 0.2s; width: 100%; max-width: 360px; }
+  .btn-enviar:hover:not(:disabled) { background: var(--green); }
+  .btn-enviar:disabled { opacity: 0.4; cursor: not-allowed; }
+  .enviar-nota { font-size: 10px; color: var(--muted); text-align: center; letter-spacing: 0.5px; }
+  .success-overlay { display: none; position: fixed; inset: 0; background: rgba(28,43,43,0.85); z-index: 200; align-items: center; justify-content: center; }
+  .success-overlay.show { display: flex; }
+  .success-card { background: var(--cream); padding: 48px 56px; text-align: center; max-width: 420px; width: 90%; }
+  .success-icon { font-size: 48px; margin-bottom: 16px; }
+  .success-titulo { font-size: 20px; font-weight: 600; margin-bottom: 8px; color: var(--dark); }
+  .success-msg { font-size: 12px; color: var(--muted); line-height: 1.8; font-weight: 300; }
+  .success-msg strong { color: var(--dark); font-weight: 500; }
+  .progress-bar { display: none; position: fixed; bottom: 0; left: 0; right: 0; height: 3px; background: var(--border); z-index: 300; }
+  .progress-fill { height: 100%; background: var(--green); width: 0%; transition: width 0.3s ease; }
+
+  @media (max-width: 700px) {
+    .doc-wrapper { padding: 32px 24px; margin: 0; box-shadow: none; }
+    .firmas-grid { grid-template-columns: 1fr; gap: 32px; }
+    .partes-grid { grid-template-columns: 1fr; }
+    .parte-block:first-child { border-right: none; border-bottom: 1.5px solid var(--dark); }
+    .entregables-grid { grid-template-columns: 1fr; }
+    .entregable-item:nth-child(odd) { border-right: none; }
+    .etapa-grid { grid-template-columns: 1fr; }
+    .etapa-item { border-right: none; border-bottom: 1px solid var(--border); }
+    .signing-banner { padding: 12px 20px; }
+    .banner-title { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="signing-banner">
+  <div class="banner-left">
+    <div class="banner-logo"><em>dr.</em>saia</div>
+    <div class="banner-title">Firma electrónica de contrato</div>
+  </div>
+  <div class="banner-status">
+    <div class="status-dot"></div>
+    Pendiente de firma
+  </div>
+</div>
+
+<div class="doc-wrapper" id="contrato-doc">
+
+  <div class="doc-header">
+    <div>
+      <div class="logo-wordmark"><em>dr.</em>saia</div>
+      <div class="logo-sub">Medical Mrkt · Social Media Mngmt. · By Isabel Castellanos</div>
+    </div>
+    <div class="doc-meta-right">
+      <div class="doc-type">Acuerdo de trabajo</div>
+      <div class="doc-date" id="doc-fecha-header">Landing Page</div>
+    </div>
+  </div>
+
+  <div class="partes-grid">
+    <div class="parte-block">
+      <div class="parte-label">/ Cliente</div>
+      <div class="parte-name" id="display-nombre">—</div>
+      <div class="parte-detail" id="display-detalle">—</div>
+    </div>
+    <div class="parte-block">
+      <div class="parte-label">/ Estudio</div>
+      <div class="parte-name">Dr. Saia | Marketing Médico</div>
+      <div class="parte-detail">Isabel Castellanos Barrón<br>RFC: CABI990108LH4<br>Monterrey, Nuevo León</div>
+    </div>
+  </div>
+
+  <div class="servicio-hero">
+    <div>
+      <div class="servicio-tipo">Desarrollo Web · Presencia Digital</div>
+      <div class="servicio-nombre">Landing<br>Page</div>
+    </div>
+    <div class="servicio-hero-right">
+      <div class="servicio-precio-label">Inversión total</div>
+      <div class="servicio-precio">$10,200</div>
+      <div class="servicio-precio-iva">MXN + IVA · 50% inicio · 50% al publicar</div>
+    </div>
+  </div>
+
+  <div class="seccion">
+    <div class="seccion-num-titulo"><span class="sec-num">01</span><span class="sec-titulo">Objeto del contrato</span></div>
+    <p class="body">El presente acuerdo tiene por objeto la prestación del servicio de <strong>diseño y desarrollo de Landing Page médica</strong>, que incluye estructura, diseño visual, redacción de contenido, integración de elementos de conversión y publicación en plataforma Wix, conforme a los entregables y etapas descritos a continuación.</p>
+    <p class="body">Las partes celebran el presente contrato el <strong id="doc-fecha-cuerpo">—</strong>, reconociendo la capacidad legal para obligarse en los términos aquí descritos.</p>
+  </div>
+
+  <div class="seccion">
+    <div class="seccion-num-titulo"><span class="sec-num">02</span><span class="sec-titulo">Entregables</span></div>
+    <div class="entregables-grid">
+      <div class="entregable-item"><div class="entregable-dot"></div>Diseño visual alineado a identidad de marca</div>
+      <div class="entregable-item"><div class="entregable-dot"></div>Estructura de conversión (hero, beneficios, CTA)</div>
+      <div class="entregable-item"><div class="entregable-dot"></div>Redacción de contenido orientado al paciente ideal</div>
+      <div class="entregable-item"><div class="entregable-dot"></div>Integración de formulario de contacto o agenda</div>
+      <div class="entregable-item"><div class="entregable-dot"></div>Optimización para dispositivos móviles (responsive)</div>
+      <div class="entregable-item"><div class="entregable-dot"></div>SEO básico (metaetiquetas, título, descripción)</div>
+      <div class="entregable-item"><div class="entregable-dot"></div>Publicación en Wix con dominio del cliente</div>
+      <div class="entregable-item"><div class="entregable-dot"></div>2 rondas de ajustes incluidas</div>
+    </div>
+    <div class="nota-box"><p><strong>SOBRE EL CONTENIDO:</strong> El cliente debe proporcionar logo en alta resolución, fotografías profesionales y la información médica a incluir. El proveedor redacta el contenido con base en la información entregada.</p></div>
+  </div>
+
+  <div class="seccion">
+    <div class="seccion-num-titulo"><span class="sec-num">03</span><span class="sec-titulo">Proceso y tiempo de entrega</span></div>
+    <p class="body">El tiempo estimado de entrega es de <strong>1 mes</strong> a partir del inicio formal del proyecto, una vez recibido el primer pago y el material del cliente.</p>
+    <div class="etapa-grid">
+      <div class="etapa-item"><div class="etapa-num">Etapa 1</div><div class="etapa-titulo">Cuestionario + estructura</div><div class="etapa-desc">Cuestionario de marca. El cliente entrega material (logo, fotos, info)</div></div>
+      <div class="etapa-item"><div class="etapa-num">Etapa 2</div><div class="etapa-titulo">Diseño + redacción</div><div class="etapa-desc">Diseño visual completo y redacción. Se presenta propuesta para aprobación</div></div>
+      <div class="etapa-item"><div class="etapa-num">Etapa 3</div><div class="etapa-titulo">Ajustes + publicación</div><div class="etapa-desc">Ajustes aprobados, publicación en Wix y entrega de acceso al cliente</div></div>
+    </div>
+    <div class="alerta-box"><p><strong>⚠ FECHA DE EXPIRACIÓN:</strong> Este acuerdo tiene una vigencia máxima de <strong>2 meses naturales</strong> a partir de la fecha de firma. Los pagos realizados no serán reembolsables.</p></div>
+  </div>
+
+  <div class="seccion">
+    <div class="seccion-num-titulo"><span class="sec-num">04</span><span class="sec-titulo">Costo y forma de pago</span></div>
+    <table class="pago-table">
+      <thead><tr><th>Concepto</th><th>Monto</th><th>Momento de pago</th></tr></thead>
+      <tbody>
+        <tr><td>Primer pago — anticipo para iniciar</td><td>$5,100 MXN + IVA</td><td>50% al firmar el contrato</td></tr>
+        <tr><td>Segundo pago — liquidación</td><td>$5,100 MXN + IVA</td><td>50% al publicar la página</td></tr>
+        <tr><td>Total</td><td>$10,200 MXN + IVA</td><td>—</td></tr>
+      </tbody>
+    </table>
+    <div class="nota-box"><p><strong>DATOS BANCARIOS:</strong> Banco Banregio · CLABE: 058580000148814688 · Titular: Isabel Castellanos Barrón · Concepto: nombre del cliente</p></div>
+    <div class="nota-box"><p><strong>IMPORTANTE:</strong> <strong>No iniciamos hasta confirmar la recepción del anticipo del 50%.</strong> La página no se publicará hasta liquidar el 100%.</p></div>
+  </div>
+
+  <div class="seccion">
+    <div class="seccion-num-titulo"><span class="sec-num">05</span><span class="sec-titulo">Rondas de ajustes</span></div>
+    <p class="body">Se incluyen <strong>2 rondas de cambios</strong>. Cada ronda adicional: <strong>$1,500 MXN</strong>. El cliente tiene <strong>4 días hábiles</strong> para dar retroalimentación en cada etapa.</p>
+  </div>
+
+  <div class="seccion">
+    <div class="seccion-num-titulo"><span class="sec-num">06</span><span class="sec-titulo">Obligaciones de las partes</span></div>
+    <div class="sub-titulo">Proveedor</div>
+    <div class="clausula-item"><span class="clausula-num">6.1</span>Diseñar la landing page conforme a la identidad visual y estructura acordada.</div>
+    <div class="clausula-item"><span class="clausula-num">6.2</span>Redactar el contenido con base en la información proporcionada por el cliente.</div>
+    <div class="clausula-item"><span class="clausula-num">6.3</span>Entregar la página optimizada para móvil, con SEO básico y publicada en Wix.</div>
+    <div class="sub-titulo" style="margin-top:18px">Cliente</div>
+    <div class="clausula-item"><span class="clausula-num">6.4</span>Entregar todo el material necesario antes de que inicie el diseño.</div>
+    <div class="clausula-item"><span class="clausula-num">6.5</span>Contar con plan de Wix activo y dominio personalizado.</div>
+    <div class="clausula-item"><span class="clausula-num">6.6</span>Dar retroalimentación dentro de 4 días hábiles en cada etapa.</div>
+    <div class="clausula-item"><span class="clausula-num">6.7</span>Realizar los pagos en las fechas estipuladas.</div>
+  </div>
+
+  <div class="seccion">
+    <div class="seccion-num-titulo"><span class="sec-num">07</span><span class="sec-titulo">Propiedad intelectual y jurisdicción</span></div>
+    <div class="clausula-item"><span class="clausula-num">7.1</span>El cliente será propietario de la landing page únicamente después de liquidar el pago completo.</div>
+    <div class="clausula-item"><span class="clausula-num">7.2</span>El proveedor puede utilizar imágenes de la página como portafolio, salvo solicitud expresa por escrito antes de la firma.</div>
+    <div class="clausula-item"><span class="clausula-num">7.3</span>Si el cliente cancela después de iniciado el proyecto, el anticipo del 50% no será reembolsable.</div>
+    <div class="clausula-item"><span class="clausula-num">7.4</span>Las partes se someten a los tribunales de <strong>Monterrey, Nuevo León</strong>.</div>
+  </div>
+
+  <!-- FIRMAS -->
+  <div class="firmas-section" id="firmas-section">
+    <div class="firmas-grid">
+
+      <!-- PROVEEDOR (firma fija SVG) -->
+      <div>
+        <div class="firma-rol">/ Proveedor · Dr. Saia</div>
+        <div class="firma-campo"><label>Nombre</label><div class="firma-linea">Isabel Castellanos Barrón</div></div>
+        <div class="firma-campo"><label>RFC</label><div class="firma-linea">CABI990108LH4</div></div>
+        <div class="firma-campo">
+          <label>Firma</label>
+          <div class="firma-canvas-wrap has-firma" style="border-color:var(--green);background:var(--white);display:flex;align-items:center;justify-content:center;padding:8px;">
+            <svg viewBox="0 0 320 90" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:80px;">
+              <path d="M 20 65 C 22 40 24 35 26 38 C 28 41 26 58 27 62" fill="none" stroke="#1C2B2B" stroke-width="2" stroke-linecap="round"/>
+              <path d="M 34 45 C 36 38 40 34 44 36 C 48 38 47 46 44 50 C 41 54 36 54 35 52 C 34 50 36 46 40 45 C 45 44 50 47 50 52" fill="none" stroke="#1C2B2B" stroke-width="2" stroke-linecap="round"/>
+              <path d="M 56 35 C 56 50 54 60 55 65" fill="none" stroke="#1C2B2B" stroke-width="2" stroke-linecap="round"/>
+              <path d="M 52 48 L 60 48" fill="none" stroke="#1C2B2B" stroke-width="1.5" stroke-linecap="round"/>
+              <path d="M 65 42 C 67 38 72 36 75 38 C 78 40 77 48 74 53 C 71 58 66 59 65 56 C 64 52 68 48 73 48 C 78 48 80 53 79 58" fill="none" stroke="#1C2B2B" stroke-width="2" stroke-linecap="round"/>
+              <path d="M 86 42 C 84 48 84 55 85 62 C 86 68 88 70 89 68" fill="none" stroke="#1C2B2B" stroke-width="2" stroke-linecap="round"/>
+              <path d="M 83 46 C 87 43 92 42 95 44 C 98 46 97 52 94 56" fill="none" stroke="#1C2B2B" stroke-width="2" stroke-linecap="round"/>
+              <path d="M 104 38 C 102 50 101 60 102 65" fill="none" stroke="#1C2B2B" stroke-width="2" stroke-linecap="round"/>
+              <path d="M 100 48 L 108 47" fill="none" stroke="#1C2B2B" stroke-width="1.5" stroke-linecap="round"/>
+              <path d="M 145 44 C 140 40 133 40 130 45 C 127 50 128 58 132 62 C 136 66 143 65 146 61" fill="none" stroke="#1C2B2B" stroke-width="2" stroke-linecap="round"/>
+              <path d="M 152 36 L 152 65" fill="none" stroke="#1C2B2B" stroke-width="2" stroke-linecap="round"/>
+              <path d="M 152 36 C 162 36 165 40 162 44 C 159 48 152 48 152 48 C 162 48 166 52 163 57 C 160 62 152 62 152 62" fill="none" stroke="#1C2B2B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M 20 76 C 50 72 100 74 150 73 C 180 72 200 74 230 72" fill="none" stroke="#1C2B2B" stroke-width="1" stroke-linecap="round" opacity="0.4"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- CLIENTE -->
+      <div>
+        <div class="firma-rol">/ Cliente</div>
+        <div class="firma-campo"><label>Nombre</label><div class="firma-linea" id="firma-nombre-display">—</div></div>
+        <div class="firma-campo">
+          <label>RFC</label>
+          <input class="rfc-input" id="rfc-cliente" placeholder="Ingresa tu RFC (opcional)" maxlength="13" />
+        </div>
+        <div class="firma-campo">
+          <label>Correo electrónico <span style="color:var(--accent);font-size:9px;"> * requerido</span></label>
+          <input class="rfc-input" id="email-cliente" type="email" placeholder="tu@correo.com" />
+        </div>
+        <div class="firma-campo">
+          <label>Firma <span style="color:var(--accent);font-size:9px;"> * requerida</span></label>
+          <div class="firma-canvas-wrap" id="wrap-cliente">
+            <canvas class="firma-pad" id="canvas-cliente" width="400" height="100"></canvas>
+            <div class="firma-hint" id="hint-cliente"><span>✍️</span>Dibuja tu firma aquí</div>
+            <button class="btn-limpiar" onclick="limpiarFirma('cliente')">Limpiar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="fecha-final">
+      Para constancia, se firma el <strong id="fecha-firma-final">—</strong> en la ciudad de Monterrey, Nuevo León.<br>
+      <span style="font-size:10px;color:#C0392B;font-weight:400;margin-top:4px;display:block">Este contrato expira automáticamente 2 meses después de la fecha de firma si el cliente no ha entregado la información necesaria para iniciar.</span>
+    </div>
+
+    <div class="terminos-wrap" id="terminos-wrap">
+      <div class="terminos-check" id="terminos-check" onclick="toggleTerminos()">
+        <svg width="12" height="10" viewBox="0 0 12 10" fill="none">
+          <path d="M1 5L4.5 8.5L11 1.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="terminos-texto">
+        He leído y acepto en su totalidad los términos del presente <strong>Acuerdo de Trabajo — Landing Page</strong> con Dr. Saia | Marketing Médico. Entiendo que mi firma electrónica tiene la misma validez que una firma autógrafa conforme a la legislación mexicana vigente.
+      </div>
+    </div>
+
+    <div class="enviar-wrap">
+      <button class="btn-enviar" id="btn-enviar" disabled onclick="enviarContrato()">
+        Firmar y enviar contrato
+      </button>
+      <div class="enviar-nota">Al enviar, ambas partes recibirán una copia del contrato firmado por correo electrónico</div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <span>Acuerdo de trabajo · Landing Page</span>
+    <span>Dr. Saia | Marketing Médico</span>
+    <span>@dr.saiaa</span>
+  </div>
+</div>
+
+<!-- SUCCESS -->
+<div class="success-overlay" id="success-overlay">
+  <div class="success-card">
+    <div class="success-icon">✅</div>
+    <div class="success-titulo">¡Contrato firmado!</div>
+    <div class="success-msg">
+      Tu firma ha sido registrada el <strong id="success-fecha">—</strong>.<br><br>
+      Una copia del contrato firmado ha sido enviada a <strong>drsaia.medmkt@gmail.com</strong> y a tu correo.<br><br>
+      En breve nos pondremos en contacto contigo para comenzar con el proyecto.
+    </div>
+  </div>
+</div>
+
+<div class="progress-bar" id="progress-bar">
+  <div class="progress-fill" id="progress-fill"></div>
+</div>
+
+<script>
+  // ── DATOS DINÁMICOS DESDE URL ──────────────────────────────
+  // Uso: ?nombre=Marla+Gallo&especialidad=Neuróloga&domicilio=Circuito+166
+  // Todos los parámetros son opcionales
+
+  function getFechaHoy() {
+    const meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+    const hoy = new Date();
+    return `${hoy.getDate()} de ${meses[hoy.getMonth()]} de ${hoy.getFullYear()}`;
+  }
+
+  function initDatos() {
+    const params = new URLSearchParams(window.location.search);
+    const nombre      = params.get('nombre')      || '';
+    const especialidad= params.get('especialidad')|| '';
+    const domicilio   = params.get('domicilio')   || '';
+    const fecha       = params.get('fecha')       || getFechaHoy();
+
+    // Nombre en encabezado y firma
+    document.getElementById('display-nombre').textContent    = nombre || '— Nombre del cliente —';
+    document.getElementById('firma-nombre-display').textContent = nombre || '—';
+
+    // Detalle del cliente
+    let detalle = '';
+    if (especialidad) detalle += especialidad + '<br>';
+    if (domicilio)    detalle += domicilio;
+    document.getElementById('display-detalle').innerHTML = detalle || '—';
+
+    // Fechas en todo el documento
+    const fechaTexto = fecha;
+    document.getElementById('doc-fecha-header').textContent  = 'Landing Page · ' + fechaTexto;
+    document.getElementById('doc-fecha-cuerpo').textContent  = fechaTexto;
+    document.getElementById('fecha-firma-final').textContent = fechaTexto;
+    document.getElementById('success-fecha').textContent     = fechaTexto;
+
+    // Guardar para el PDF y webhook
+    window._datosContrato = { nombre, especialidad, domicilio, fecha: fechaTexto };
+  }
+
+  // ── FIRMA PAD ──────────────────────────────────────────────
+  const pads = {};
+
+  function initPad(id) {
+    const canvas = document.getElementById('canvas-' + id);
+    const wrap   = document.getElementById('wrap-' + id);
+    const hint   = document.getElementById('hint-' + id);
+    const ctx    = canvas.getContext('2d');
+    let drawing  = false;
+    let hasFirma = false;
+
+    canvas.width  = (canvas.offsetWidth || 400) * (window.devicePixelRatio || 1);
+    canvas.height = 100 * (window.devicePixelRatio || 1);
+    ctx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
+    ctx.strokeStyle = '#1C2B2B'; ctx.lineWidth = 2;
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+
+    function getPos(e) {
+      const r = canvas.getBoundingClientRect();
+      const sx = canvas.offsetWidth / r.width, sy = canvas.offsetHeight / r.height;
+      if (e.touches) return { x:(e.touches[0].clientX-r.left)*sx, y:(e.touches[0].clientY-r.top)*sy };
+      return { x:(e.clientX-r.left)*sx, y:(e.clientY-r.top)*sy };
+    }
+    function start(e) {
+      e.preventDefault(); drawing = true;
+      const pos = getPos(e); ctx.beginPath(); ctx.moveTo(pos.x, pos.y);
+      if (!hasFirma) { hasFirma=true; hint.style.opacity='0'; wrap.classList.add('has-firma'); }
+    }
+    function draw(e)  { if (!drawing) return; e.preventDefault(); const pos=getPos(e); ctx.lineTo(pos.x,pos.y); ctx.stroke(); }
+    function stop()   { drawing=false; verificarEstado(); }
+
+    canvas.addEventListener('mousedown', start);
+    canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('mouseup', stop);
+    canvas.addEventListener('mouseleave', stop);
+    canvas.addEventListener('touchstart', start, {passive:false});
+    canvas.addEventListener('touchmove', draw, {passive:false});
+    canvas.addEventListener('touchend', stop);
+
+    pads[id] = { canvas, ctx, hint, wrap,
+      get hasFirma() { return hasFirma; },
+      set hasFirma(v) { hasFirma=v; } };
+  }
+
+  function limpiarFirma(id) {
+    const p = pads[id];
+    p.ctx.clearRect(0,0,p.canvas.width,p.canvas.height);
+    p.hasFirma=false; p.hint.style.opacity='1'; p.wrap.classList.remove('has-firma');
+    verificarEstado();
+  }
+
+  // ── TÉRMINOS ───────────────────────────────────────────────
+  let terminosAceptados = false;
+  function toggleTerminos() {
+    terminosAceptados = !terminosAceptados;
+    document.getElementById('terminos-check').classList.toggle('checked', terminosAceptados);
+    verificarEstado();
+  }
+
+  // ── VERIFICAR ESTADO ───────────────────────────────────────
+  function verificarEstado() {
+    const firmaOk = pads['cliente'] && pads['cliente'].hasFirma;
+    const emailOk = (document.getElementById('email-cliente').value||'').includes('@');
+    document.getElementById('btn-enviar').disabled = !(firmaOk && terminosAceptados && emailOk);
+  }
+
+  // ── ENVIAR ─────────────────────────────────────────────────
+  async function enviarContrato() {
+    const btn = document.getElementById('btn-enviar');
+    btn.disabled = true;
+    btn.textContent = 'Generando PDF...';
+
+    const progressBar  = document.getElementById('progress-bar');
+    const progressFill = document.getElementById('progress-fill');
+    progressBar.style.display = 'block';
+
+    const emailVal = document.getElementById('email-cliente').value || '';
+    const rfcVal   = document.getElementById('rfc-cliente').value   || '';
+    const datos    = window._datosContrato || {};
+
+    // Congelar campos para el PDF
+    document.getElementById('rfc-cliente').style.display   = 'none';
+    document.getElementById('email-cliente').style.display = 'none';
+    const rfcSpan   = Object.assign(document.createElement('div'),{className:'firma-linea',textContent:rfcVal||'—'});
+    const emailSpan = Object.assign(document.createElement('div'),{className:'firma-linea',textContent:emailVal});
+    document.getElementById('rfc-cliente').parentNode.appendChild(rfcSpan);
+    document.getElementById('email-cliente').parentNode.appendChild(emailSpan);
+    document.querySelectorAll('.btn-limpiar').forEach(b=>b.style.display='none');
+    document.getElementById('terminos-wrap').style.display = 'none';
+    document.getElementById('enviar-wrap').style.display   = 'none';
+    document.querySelectorAll('.firma-hint').forEach(h=>h.style.display='none');
+
+    progressFill.style.width = '20%';
+    await new Promise(r=>setTimeout(r,300));
+
+    try {
+      progressFill.style.width = '50%';
+      btn.textContent = 'Capturando documento...';
+
+      const canvas = await html2canvas(document.getElementById('contrato-doc'),{
+        scale:2, useCORS:true, backgroundColor:'#F7F5F2', logging:false
+      });
+
+      progressFill.style.width = '72%';
+      btn.textContent = 'Generando PDF...';
+      await new Promise(r=>setTimeout(r,200));
+
+      const {jsPDF} = window.jspdf;
+      const pdf = new jsPDF({orientation:'portrait',unit:'mm',format:'letter'});
+      const imgData = canvas.toDataURL('image/jpeg',0.95);
+      const pdfW = pdf.internal.pageSize.getWidth();
+      const pdfH = (canvas.height * pdfW) / canvas.width;
+      const pageH = pdf.internal.pageSize.getHeight();
+      let posY = 0;
+      while (posY < pdfH) {
+        if (posY > 0) pdf.addPage();
+        pdf.addImage(imgData,'JPEG',0,-posY,pdfW,pdfH);
+        posY += pageH;
+      }
+
+      // Descargar localmente
+      const nombreArchivo = `Contrato_LandingPage_${(datos.nombre||'cliente').replace(/\s+/g,'_')}_firmado.pdf`;
+      pdf.save(nombreArchivo);
+
+      progressFill.style.width = '82%';
+      btn.textContent = 'Subiendo PDF...';
+      await new Promise(r=>setTimeout(r,200));
+
+      // Subir a file.io y llamar webhook GHL
+      try {
+        const pdfBlob  = pdf.output('blob');
+        const formData = new FormData();
+        formData.append('file', pdfBlob, nombreArchivo);
+
+        const uploadRes  = await fetch('https://file.io/?expires=7d',{method:'POST',body:formData});
+        const uploadData = await uploadRes.json();
+        if (!uploadData.success) throw new Error('file.io falló');
+        const pdfUrl = uploadData.link;
+
+        btn.textContent = 'Enviando por correo...';
+        progressFill.style.width = '92%';
+
+        await fetch('https://services.leadconnectorhq.com/hooks/MJAC8gpAN4fDq2ZNYPO0/webhook-trigger/a6a14b1a-c31a-42f1-9dce-16b993abe2c6',{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({
+            nombre_cliente: datos.nombre    || '—',
+            especialidad:   datos.especialidad || '—',
+            domicilio:      datos.domicilio || '—',
+            email_cliente:  emailVal,
+            rfc_cliente:    rfcVal,
+            email_isabel:   'drsaia.medmkt@gmail.com',
+            servicio:       'Landing Page',
+            monto:          '$10,200 MXN + IVA',
+            fecha_firma:    datos.fecha,
+            pdf_url:        pdfUrl
+          })
+        });
+      } catch(webhookErr) {
+        console.warn('Webhook error:', webhookErr);
+      }
+
+      progressFill.style.width = '100%';
+      await new Promise(r=>setTimeout(r,400));
+
+      document.getElementById('success-overlay').classList.add('show');
+      document.querySelector('.banner-status').innerHTML =
+        '<div class="status-dot" style="background:#4CAF50;animation:none"></div> Firmado';
+
+    } catch(err) {
+      console.error(err);
+      alert('Error al generar el PDF. Intenta de nuevo.');
+      btn.disabled = false;
+      btn.textContent = 'Firmar y enviar contrato';
+    }
+    progressBar.style.display = 'none';
+  }
+
+  // ── INIT ───────────────────────────────────────────────────
+  window.addEventListener('load', () => {
+    initDatos();
+    initPad('cliente');
+    document.getElementById('email-cliente').addEventListener('input', verificarEstado);
+    document.getElementById('rfc-cliente').addEventListener('input', verificarEstado);
+  });
+</script>
+</body>
+</html>
