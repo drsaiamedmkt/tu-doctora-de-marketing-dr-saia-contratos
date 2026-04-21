@@ -565,9 +565,18 @@
         const formData = new FormData();
         formData.append('file', pdfBlob, nombreArchivo);
 
-        const uploadRes  = await fetch('https://0x0.st',{method:'POST',body:formData});
-        const pdfUrl = await uploadRes.text();
-        if (!pdfUrl || !pdfUrl.startsWith('https://')) throw new Error('0x0.st falló');
+        const uploadRes  = await fetch('https://script.google.com/macros/s/AKfycbxNvkzAtX-AD77DefBR2XCVzSqZKjW_GBA7PncUe8PDnQMtvCzwtmZEO_S5MWgFLRzu/exec',{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({
+            pdf_base64: btoa(String.fromCharCode(...new Uint8Array(await pdfBlob.arrayBuffer()))),
+            nombre_cliente: nombreVal || 'cliente',
+            fecha_firma: fechaTexto
+          })
+        });
+        const uploadData = await uploadRes.json();
+        if (!uploadData.success) throw new Error('Google Script error: ' + uploadData.error);
+        const pdfUrl = uploadData.pdf_url;
 
         btn.textContent = 'Enviando por correo...';
         progressFill.style.width = '92%';
