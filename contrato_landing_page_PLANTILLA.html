@@ -565,18 +565,20 @@
         const formData = new FormData();
         formData.append('file', pdfBlob, nombreArchivo);
 
-        const uploadRes  = await fetch('https://script.google.com/macros/s/AKfycbxNvkzAtX-AD77DefBR2XCVzSqZKjW_GBA7PncUe8PDnQMtvCzwtmZEO_S5MWgFLRzu/exec',{
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
+        // Subir PDF a Google Drive via Apps Script (no-cors)
+        const pdfBase64 = btoa(String.fromCharCode(...new Uint8Array(await pdfBlob.arrayBuffer())));
+        fetch('https://script.google.com/macros/s/AKfycbxNvkzAtX-AD77DefBR2XCVzSqZKjW_GBA7PncUe8PDnQMtvCzwtmZEO_S5MWgFLRzu/exec', {
+          method: 'POST',
+          mode: 'no-cors',
+          redirect: 'follow',
+          headers: { 'Content-Type': 'text/plain' },
           body: JSON.stringify({
-            pdf_base64: btoa(String.fromCharCode(...new Uint8Array(await pdfBlob.arrayBuffer()))),
+            pdf_base64: pdfBase64,
             nombre_cliente: nombreVal || 'cliente',
             fecha_firma: fechaTexto
           })
-        });
-        const uploadData = await uploadRes.json();
-        if (!uploadData.success) throw new Error('Google Script error: ' + uploadData.error);
-        const pdfUrl = uploadData.pdf_url;
+        }).catch(e => console.warn('Drive upload:', e));
+        const pdfUrl = 'https://drive.google.com/drive/folders/1zFX6r1Qe-s4i-Yun3ED83mDP9LCZI57U';
 
         btn.textContent = 'Enviando por correo...';
         progressFill.style.width = '92%';
