@@ -495,11 +495,11 @@
     const nombreVal     = document.getElementById('input-nombre').value  || '';
     const especialidadVal = document.getElementById('input-especialidad').value || '';
     const domicilioVal  = document.getElementById('input-domicilio').value || '';
-    const datos = { nombre: nombreVal, especialidad: especialidadVal, domicilio: domicilioVal, fecha: fechaTexto };
     // Capturar fecha actual
     const meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
     const hoy = new Date();
-    const fechaTexto = `${hoy.getDate()} de ${meses[hoy.getMonth()]} de ${hoy.getFullYear()}`;
+    const fechaTexto = hoy.getDate() + ' de ' + meses[hoy.getMonth()] + ' de ' + hoy.getFullYear();
+    const datos = { nombre: nombreVal, especialidad: especialidadVal, domicilio: domicilioVal, fecha: fechaTexto };
 
     // Congelar campos para el PDF
     // Congelar inputs del cliente en el header
