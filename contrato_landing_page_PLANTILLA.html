@@ -565,10 +565,9 @@
         const formData = new FormData();
         formData.append('file', pdfBlob, nombreArchivo);
 
-        const uploadRes  = await fetch('https://file.io/?expires=7d',{method:'POST',body:formData});
-        const uploadData = await uploadRes.json();
-        if (!uploadData.success) throw new Error('file.io falló');
-        const pdfUrl = uploadData.link;
+        const uploadRes  = await fetch('https://0x0.st',{method:'POST',body:formData});
+        const pdfUrl = await uploadRes.text();
+        if (!pdfUrl || !pdfUrl.startsWith('https://')) throw new Error('0x0.st falló');
 
         btn.textContent = 'Enviando por correo...';
         progressFill.style.width = '92%';
