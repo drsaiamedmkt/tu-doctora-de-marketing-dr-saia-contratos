@@ -48,6 +48,10 @@
   .parte-block:first-child { border-right: 1.5px solid var(--dark); }
   .parte-label { font-size: 9px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; font-weight: 500; }
   .parte-name { font-size: 15px; font-weight: 500; margin-bottom: 4px; }
+  .parte-input { width: 100%; border: none; border-bottom: 1.5px solid var(--border); background: transparent; font-family: 'Poppins', sans-serif; font-size: 13px; font-weight: 400; color: var(--dark); padding: 4px 0 3px; outline: none; transition: border-color 0.2s; margin-bottom: 10px; }
+  .parte-input:focus { border-bottom-color: var(--green); }
+  .parte-input::placeholder { color: var(--muted); font-style: italic; font-size: 11px; }
+  .parte-input-label { font-size: 8px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 2px; font-weight: 500; }
   .parte-detail { font-size: 11px; color: var(--muted); line-height: 1.7; font-weight: 300; }
   .servicio-hero { background: var(--dark); color: var(--white); padding: 28px 32px; margin-bottom: 40px; display: flex; justify-content: space-between; align-items: flex-end; }
   .servicio-tipo { font-size: 9px; letter-spacing: 3px; text-transform: uppercase; color: var(--green-light); margin-bottom: 10px; font-weight: 400; }
@@ -177,8 +181,12 @@
   <div class="partes-grid">
     <div class="parte-block">
       <div class="parte-label">/ Cliente</div>
-      <div class="parte-name" id="display-nombre">—</div>
-      <div class="parte-detail" id="display-detalle">—</div>
+      <span class="parte-input-label">Nombre completo *</span>
+      <input class="parte-input" id="input-nombre" type="text" placeholder="Dr. Ana García López" maxlength="80" />
+      <span class="parte-input-label">Especialidad médica</span>
+      <input class="parte-input" id="input-especialidad" type="text" placeholder="Cardióloga" maxlength="80" />
+      <span class="parte-input-label">Domicilio</span>
+      <input class="parte-input" id="input-domicilio" type="text" placeholder="Av. Constitución 123, Col. Centro" maxlength="120" />
     </div>
     <div class="parte-block">
       <div class="parte-label">/ Estudio</div>
@@ -391,25 +399,18 @@
     const domicilio   = params.get('domicilio')   || '';
     const fecha       = params.get('fecha')       || getFechaHoy();
 
-    // Nombre en encabezado y firma
-    document.getElementById('display-nombre').textContent    = nombre || '— Nombre del cliente —';
-    document.getElementById('firma-nombre-display').textContent = nombre || '—';
-
-    // Detalle del cliente
-    let detalle = '';
-    if (especialidad) detalle += especialidad + '<br>';
-    if (domicilio)    detalle += domicilio;
-    document.getElementById('display-detalle').innerHTML = detalle || '—';
-
-    // Fechas en todo el documento
+    // Fecha automática
     const fechaTexto = fecha;
     document.getElementById('doc-fecha-header').textContent  = 'Landing Page · ' + fechaTexto;
     document.getElementById('doc-fecha-cuerpo').textContent  = fechaTexto;
     document.getElementById('fecha-firma-final').textContent = fechaTexto;
     document.getElementById('success-fecha').textContent     = fechaTexto;
 
-    // Guardar para el PDF y webhook
-    window._datosContrato = { nombre, especialidad, domicilio, fecha: fechaTexto };
+    // Sincronizar nombre en firma cuando el cliente escribe
+    document.getElementById('input-nombre').addEventListener('input', function() {
+      document.getElementById('firma-nombre-display').textContent = this.value || '—';
+      verificarEstado();
+    });
   }
 
   // ── FIRMA PAD ──────────────────────────────────────────────
@@ -473,9 +474,10 @@
 
   // ── VERIFICAR ESTADO ───────────────────────────────────────
   function verificarEstado() {
-    const firmaOk = pads['cliente'] && pads['cliente'].hasFirma;
-    const emailOk = (document.getElementById('email-cliente').value||'').includes('@');
-    document.getElementById('btn-enviar').disabled = !(firmaOk && terminosAceptados && emailOk);
+    const firmaOk  = pads['cliente'] && pads['cliente'].hasFirma;
+    const emailOk  = (document.getElementById('email-cliente').value||'').includes('@');
+    const nombreOk = (document.getElementById('input-nombre').value||'').trim().length > 2;
+    document.getElementById('btn-enviar').disabled = !(firmaOk && terminosAceptados && emailOk && nombreOk);
   }
 
   // ── ENVIAR ─────────────────────────────────────────────────
@@ -488,11 +490,28 @@
     const progressFill = document.getElementById('progress-fill');
     progressBar.style.display = 'block';
 
-    const emailVal = document.getElementById('email-cliente').value || '';
-    const rfcVal   = document.getElementById('rfc-cliente').value   || '';
-    const datos    = window._datosContrato || {};
+    const emailVal      = document.getElementById('email-cliente').value || '';
+    const rfcVal        = document.getElementById('rfc-cliente').value   || '';
+    const nombreVal     = document.getElementById('input-nombre').value  || '';
+    const especialidadVal = document.getElementById('input-especialidad').value || '';
+    const domicilioVal  = document.getElementById('input-domicilio').value || '';
+    const datos = { nombre: nombreVal, especialidad: especialidadVal, domicilio: domicilioVal, fecha: fechaTexto };
+    // Capturar fecha actual
+    const meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+    const hoy = new Date();
+    const fechaTexto = `${hoy.getDate()} de ${meses[hoy.getMonth()]} de ${hoy.getFullYear()}`;
 
     // Congelar campos para el PDF
+    // Congelar inputs del cliente en el header
+    ['input-nombre','input-especialidad','input-domicilio'].forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const div = Object.assign(document.createElement('div'),{className:'parte-name',textContent:el.value||'—'});
+      div.style.fontSize = '13px';
+      el.parentNode.insertBefore(div, el);
+      el.style.display = 'none';
+      el.previousElementSibling.style.display = 'none'; // ocultar label también
+    });
     document.getElementById('rfc-cliente').style.display   = 'none';
     document.getElementById('email-cliente').style.display = 'none';
     const rfcSpan   = Object.assign(document.createElement('div'),{className:'firma-linea',textContent:rfcVal||'—'});
@@ -554,19 +573,19 @@
         btn.textContent = 'Enviando por correo...';
         progressFill.style.width = '92%';
 
-        await fetch('https://services.leadconnectorhq.com/hooks/MJAC8gpAN4fDq2ZNYPO0/webhook-trigger/a6a14b1a-c31a-42f1-9dce-16b993abe2c6',{
+        await fetch('https://services.leadconnectorhq.com/hooks/MJAC8gpAN4fDq2ZNYPO0/webhook-trigger/589a6691-9cd3-4e02-8206-4a98e2fa8b1c',{
           method:'POST',
           headers:{'Content-Type':'application/json'},
           body: JSON.stringify({
-            nombre_cliente: datos.nombre    || '—',
-            especialidad:   datos.especialidad || '—',
-            domicilio:      datos.domicilio || '—',
+            nombre_cliente: nombreVal    || '—',
+            especialidad:   especialidadVal || '—',
+            domicilio:      domicilioVal || '—',
             email_cliente:  emailVal,
             rfc_cliente:    rfcVal,
             email_isabel:   'drsaia.medmkt@gmail.com',
             servicio:       'Landing Page',
             monto:          '$10,200 MXN + IVA',
-            fecha_firma:    datos.fecha,
+            fecha_firma:    fechaTexto,
             pdf_url:        pdfUrl
           })
         });
@@ -596,6 +615,7 @@
     initPad('cliente');
     document.getElementById('email-cliente').addEventListener('input', verificarEstado);
     document.getElementById('rfc-cliente').addEventListener('input', verificarEstado);
+    // nombre ya tiene listener en initDatos
   });
 </script>
 </body>
