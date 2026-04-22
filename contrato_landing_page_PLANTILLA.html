@@ -584,7 +584,15 @@
         formData.append('file', pdfBlob, nombreArchivo);
 
         // Subir PDF a Google Drive via Apps Script (no-cors)
-        const pdfBase64 = btoa(String.fromCharCode(...new Uint8Array(await pdfBlob.arrayBuffer())));
+        // Conversión a base64 segura para PDFs grandes
+        const arrayBuffer = await pdfBlob.arrayBuffer();
+        const uint8Array = new Uint8Array(arrayBuffer);
+        let binary = '';
+        const chunkSize = 8192;
+        for (let i = 0; i < uint8Array.length; i += chunkSize) {
+          binary += String.fromCharCode(...uint8Array.subarray(i, i + chunkSize));
+        }
+        const pdfBase64 = btoa(binary);
         fetch('https://script.google.com/macros/s/AKfycbxNvkzAtX-AD77DefBR2XCVzSqZKjW_GBA7PncUe8PDnQMtvCzwtmZEO_S5MWgFLRzu/exec', {
           method: 'POST',
           mode: 'no-cors',
