@@ -187,6 +187,8 @@
       <input class="parte-input" id="input-especialidad" type="text" placeholder="Cardióloga" maxlength="80" />
       <span class="parte-input-label">Domicilio</span>
       <input class="parte-input" id="input-domicilio" type="text" placeholder="Av. Constitución 123, Col. Centro" maxlength="120" />
+      <span class="parte-input-label">Fecha del contrato *</span>
+      <input class="parte-input" id="input-fecha" type="text" placeholder="21 de abril de 2026" maxlength="40" />
     </div>
     <div class="parte-block">
       <div class="parte-label">/ Estudio</div>
@@ -406,9 +408,23 @@
     document.getElementById('fecha-firma-final').textContent = fechaTexto;
     document.getElementById('success-fecha').textContent     = fechaTexto;
 
+    // Poner fecha de hoy como valor por defecto en el campo fecha
+    const inputFecha = document.getElementById('input-fecha');
+    if (inputFecha && !inputFecha.value) {
+      inputFecha.value = fechaTexto;
+    }
+
     // Sincronizar nombre en firma cuando el cliente escribe
     document.getElementById('input-nombre').addEventListener('input', function() {
       document.getElementById('firma-nombre-display').textContent = this.value || '—';
+      verificarEstado();
+    });
+    // Sincronizar fecha en el cuerpo del contrato cuando el cliente escribe
+    document.getElementById('input-fecha').addEventListener('input', function() {
+      const val = this.value || fechaTexto;
+      document.getElementById('doc-fecha-cuerpo').textContent = val;
+      document.getElementById('fecha-firma-final').textContent = val;
+      document.getElementById('success-fecha').textContent = val;
       verificarEstado();
     });
   }
@@ -477,7 +493,8 @@
     const firmaOk  = pads['cliente'] && pads['cliente'].hasFirma;
     const emailOk  = (document.getElementById('email-cliente').value||'').includes('@');
     const nombreOk = (document.getElementById('input-nombre').value||'').trim().length > 2;
-    document.getElementById('btn-enviar').disabled = !(firmaOk && terminosAceptados && emailOk && nombreOk);
+    const fechaOk  = (document.getElementById('input-fecha').value||'').trim().length > 2;
+    document.getElementById('btn-enviar').disabled = !(firmaOk && terminosAceptados && emailOk && nombreOk && fechaOk);
   }
 
   // ── ENVIAR ─────────────────────────────────────────────────
@@ -499,7 +516,8 @@
     const meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
     const hoy = new Date();
     const fechaTexto = hoy.getDate() + ' de ' + meses[hoy.getMonth()] + ' de ' + hoy.getFullYear();
-    const datos = { nombre: nombreVal, especialidad: especialidadVal, domicilio: domicilioVal, fecha: fechaTexto };
+    const fechaVal = document.getElementById('input-fecha').value || fechaTexto;
+    const datos = { nombre: nombreVal, especialidad: especialidadVal, domicilio: domicilioVal, fecha: fechaVal };
 
     // Congelar campos para el PDF
     // Congelar inputs del cliente en el header
@@ -595,7 +613,7 @@
             email_isabel:   'drsaia.medmkt@gmail.com',
             servicio:       'Landing Page',
             monto:          '$10,200 MXN + IVA',
-            fecha_firma:    fechaTexto,
+            fecha_firma:    fechaVal,
             pdf_url:        pdfUrl
           })
         });
